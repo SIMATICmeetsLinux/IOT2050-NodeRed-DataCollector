@@ -1,0 +1,738 @@
+[
+    {
+        "id": "e4bddf4f.b783b",
+        "type": "tab",
+        "label": "IOT2050 Communication Example"
+    },
+    {
+        "id": "ece414c0.286488",
+        "type": "inject",
+        "z": "e4bddf4f.b783b",
+        "name": "Select All",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "",
+        "topic": "select  * from IOTDatatable",
+        "payload": "",
+        "payloadType": "date",
+        "x": 1044,
+        "y": 404,
+        "wires": [
+            [
+                "dc9fb4f1.9b0388"
+            ]
+        ]
+    },
+    {
+        "id": "cf49ef8e.50f63",
+        "type": "s7 in",
+        "z": "e4bddf4f.b783b",
+        "endpoint": "57958a85.72d06c",
+        "mode": "all",
+        "variable": "IOT_INT",
+        "diff": true,
+        "name": "S7Com S7-1500 ",
+        "x": 187,
+        "y": 544,
+        "wires": [
+            [
+                "80a458ff.195d18"
+            ]
+        ]
+    },
+    {
+        "id": "cf2379d9.4e0368",
+        "type": "comment",
+        "z": "e4bddf4f.b783b",
+        "name": "S7Communication to S7-1500 PLC",
+        "info": "",
+        "x": 247,
+        "y": 504,
+        "wires": []
+    },
+    {
+        "id": "30ca5e62.10c602",
+        "type": "function",
+        "z": "e4bddf4f.b783b",
+        "name": "FormatS7Time",
+        "func": "var time = msg.payload.IOT_TIME;\nvar output = {\n    hours: \"\",\n    minutes:\"\",\n    seconds:\"\",\n    milliseconds:\"\",\n    total:\"\"\n};\nvar timeAlreadyProcessed;\nvar remainingTime;\n\n//Hours\nvar hours = time / 3600000;\nhours =  Math.floor(hours);\nremainingTime = time - (hours * 3600000);\n\n//Minutes\nvar minutes = remainingTime /60000  ;\nminutes =  Math.floor(minutes);\nremainingTime = remainingTime - (minutes * 60000);\n\n//Seconds\nvar seconds = remainingTime /1000 ;\nseconds =  Math.floor(seconds);\nremainingTime = remainingTime - (seconds * 1000);\n\n//Millliseconds\nvar milliseconds = remainingTime;\n\noutput.hours = hours;\noutput.minutes = minutes\noutput.seconds = seconds\noutput.milliseconds =  milliseconds;\n\noutput.total = `${hours}H ${minutes}min ${seconds}s ${milliseconds}ms`;\n\nmsg.payload.time = output;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 958,
+        "y": 544,
+        "wires": [
+            [
+                "57c2ec19.9806a4"
+            ]
+        ]
+    },
+    {
+        "id": "80a458ff.195d18",
+        "type": "change",
+        "z": "e4bddf4f.b783b",
+        "name": "Set ID S7Com-1500",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload.sID",
+                "pt": "msg",
+                "to": "s7com",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "payload.ID",
+                "pt": "msg",
+                "to": "0",
+                "tot": "num"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 387,
+        "y": 544,
+        "wires": [
+            [
+                "30ca5e62.10c602"
+            ]
+        ]
+    },
+    {
+        "id": "2702ff2f.b2404",
+        "type": "change",
+        "z": "e4bddf4f.b783b",
+        "name": "Define global variables",
+        "rules": [
+            {
+                "t": "set",
+                "p": "averageMaxCount",
+                "pt": "global",
+                "to": "10",
+                "tot": "num"
+            },
+            {
+                "t": "set",
+                "p": "bufferMaxCount",
+                "pt": "global",
+                "to": "3600",
+                "tot": "num"
+            },
+            {
+                "t": "set",
+                "p": "lastStoredIndex",
+                "pt": "global",
+                "to": "-1",
+                "tot": "num"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 334,
+        "y": 84,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "8326c849.7d51b8",
+        "type": "inject",
+        "z": "e4bddf4f.b783b",
+        "name": "Set Once",
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 124,
+        "y": 84,
+        "wires": [
+            [
+                "2702ff2f.b2404"
+            ]
+        ]
+    },
+    {
+        "id": "dc9fb4f1.9b0388",
+        "type": "mysql",
+        "z": "e4bddf4f.b783b",
+        "mydb": "d47812eb.9b806",
+        "name": "IOTDatabase",
+        "x": 1244,
+        "y": 464,
+        "wires": [
+            [
+                "e5af0907.855608"
+            ]
+        ]
+    },
+    {
+        "id": "35b71cd4.e6e7e4",
+        "type": "OpcUa-Client",
+        "z": "e4bddf4f.b783b",
+        "endpoint": "81aafc6f.ceacd",
+        "action": "read",
+        "deadbandvalue": "",
+        "time": 10,
+        "timeUnit": "s",
+        "localfile": "",
+        "localkeyfile": "",
+        "name": "",
+        "x": 542,
+        "y": 204,
+        "wires": [
+            [
+                "77d77b56.7bbb04"
+            ]
+        ]
+    },
+    {
+        "id": "e6918e1f.8c13b",
+        "type": "inject",
+        "z": "e4bddf4f.b783b",
+        "name": "Refresh Rate =  1sec",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "1",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "str",
+        "x": 162,
+        "y": 204,
+        "wires": [
+            [
+                "409ec09c.96f8a",
+                "21e96ff1.d81ba",
+                "3c8d4fc8.aff7c",
+                "afcb28ea.861138"
+            ]
+        ]
+    },
+    {
+        "id": "26888fec.36608",
+        "type": "modbus-getter",
+        "z": "e4bddf4f.b783b",
+        "name": "ModbusTCP S7-1500",
+        "showStatusActivities": true,
+        "showErrors": true,
+        "logIOActivities": false,
+        "unitid": "1",
+        "dataType": "HoldingRegister",
+        "adr": "0",
+        "quantity": "20",
+        "server": "f0685f5e.8dd4d8",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "keepMsgProperties": false,
+        "x": 615.7499389648438,
+        "y": 717.25,
+        "wires": [
+            [],
+            [
+                "426a3324.3294ac"
+            ]
+        ]
+    },
+    {
+        "id": "f558aa6a.8e3e88",
+        "type": "inject",
+        "z": "e4bddf4f.b783b",
+        "name": "Refresh Rate= 1sec.",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "1",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 580,
+        "y": 780,
+        "wires": [
+            [
+                "26888fec.36608"
+            ]
+        ]
+    },
+    {
+        "id": "426a3324.3294ac",
+        "type": "function",
+        "z": "e4bddf4f.b783b",
+        "name": "Convert To S7 Values",
+        "func": "\nmsg.payload.IOT_BOOL = msg.payload.data[0] >0 ? true : false;\n\nvar data = [];\ndata[0]=msg.payload.buffer[2];\ndata[1]=msg.payload.buffer[1];\n\n\n// Create a buffer\nvar buf = new ArrayBuffer(4);\n// Create a data view of it\nvar view = new DataView(buf);\n/*\ndata.forEach(function (b, i) {\n    view.setUint8(i, b);\n});\n*/\ndata.forEach((element, index) => view.setUint8(index, element));\nmsg.payload.IOT_INT = view.getInt16(0,true);\n\ndata[0]=msg.payload.buffer[5];\ndata[1]=msg.payload.buffer[4];\ndata[2]=msg.payload.buffer[7];\ndata[3]=msg.payload.buffer[6];\ndata.forEach(function (b, i) {\n    view.setUint8(i, b);\n});\n\n// Read the bits as a float; note that by doing this, we're implicitly\n// converting it from a 32-bit float into JavaScript's native 64-bit double\nmsg.payload.IOT_REAL = view.getFloat32(0,true);\n\n\ndata[0]=msg.payload.buffer[9];\ndata[1]=msg.payload.buffer[8];\ndata[2]=msg.payload.buffer[11];\ndata[3]=msg.payload.buffer[10];\n\ndata.forEach(function (b, i) {\n    view.setUint8(i, b);\n});\n\nmsg.payload.IOT_TIME= view.getInt32(0,true);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 584,
+        "y": 671,
+        "wires": [
+            [
+                "92a1004b.94e41"
+            ]
+        ]
+    },
+    {
+        "id": "92a1004b.94e41",
+        "type": "change",
+        "z": "e4bddf4f.b783b",
+        "name": "Set ID ModbusTCP-1500",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload.sID",
+                "pt": "msg",
+                "to": "modbustcp",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "payload.ID",
+                "pt": "msg",
+                "to": "3",
+                "tot": "num"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 705,
+        "y": 586,
+        "wires": [
+            [
+                "30ca5e62.10c602"
+            ]
+        ]
+    },
+    {
+        "id": "947fcc89.d4af7",
+        "type": "comment",
+        "z": "e4bddf4f.b783b",
+        "name": "Define global variables",
+        "info": "",
+        "x": 148,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "990ac140.0f12a",
+        "type": "comment",
+        "z": "e4bddf4f.b783b",
+        "name": "Modbus TCP Communication to S7-1500",
+        "info": "",
+        "x": 620,
+        "y": 820,
+        "wires": []
+    },
+    {
+        "id": "409ec09c.96f8a",
+        "type": "OpcUa-Item",
+        "z": "e4bddf4f.b783b",
+        "item": "ns=3;s=\"IOT_Data\".\"IOT_Bool\"",
+        "datatype": "Boolean",
+        "value": "",
+        "name": "IOT_BOOL",
+        "x": 372,
+        "y": 204,
+        "wires": [
+            [
+                "35b71cd4.e6e7e4"
+            ]
+        ]
+    },
+    {
+        "id": "21e96ff1.d81ba",
+        "type": "OpcUa-Item",
+        "z": "e4bddf4f.b783b",
+        "item": "ns=3;s=\"IOT_Data\".\"IOT_Int\"",
+        "datatype": "Int16",
+        "value": "",
+        "name": "IOT_INT",
+        "x": 362,
+        "y": 324,
+        "wires": [
+            [
+                "fe920d3f.cc93b"
+            ]
+        ]
+    },
+    {
+        "id": "fe920d3f.cc93b",
+        "type": "OpcUa-Client",
+        "z": "e4bddf4f.b783b",
+        "endpoint": "81aafc6f.ceacd",
+        "action": "read",
+        "deadbandvalue": "",
+        "time": 10,
+        "timeUnit": "s",
+        "localfile": "",
+        "localkeyfile": "",
+        "name": "",
+        "x": 542,
+        "y": 324,
+        "wires": [
+            [
+                "77d77b56.7bbb04"
+            ]
+        ]
+    },
+    {
+        "id": "3c8d4fc8.aff7c",
+        "type": "OpcUa-Item",
+        "z": "e4bddf4f.b783b",
+        "item": "ns=3;s=\"IOT_Data\".\"IOT_Real\"",
+        "datatype": "Float",
+        "value": "",
+        "name": "IOT_REAL",
+        "x": 372,
+        "y": 264,
+        "wires": [
+            [
+                "e65ce448.a13278"
+            ]
+        ]
+    },
+    {
+        "id": "e65ce448.a13278",
+        "type": "OpcUa-Client",
+        "z": "e4bddf4f.b783b",
+        "endpoint": "81aafc6f.ceacd",
+        "action": "read",
+        "deadbandvalue": "",
+        "time": 10,
+        "timeUnit": "s",
+        "localfile": "",
+        "localkeyfile": "",
+        "name": "",
+        "x": 542,
+        "y": 264,
+        "wires": [
+            [
+                "77d77b56.7bbb04"
+            ]
+        ]
+    },
+    {
+        "id": "afcb28ea.861138",
+        "type": "OpcUa-Item",
+        "z": "e4bddf4f.b783b",
+        "item": "ns=3;s=\"IOT_Data\".\"IOT_Time\"",
+        "datatype": "Int32",
+        "value": "",
+        "name": "IOT_TIME",
+        "x": 372,
+        "y": 384,
+        "wires": [
+            [
+                "72e5f477.71526c"
+            ]
+        ]
+    },
+    {
+        "id": "72e5f477.71526c",
+        "type": "OpcUa-Client",
+        "z": "e4bddf4f.b783b",
+        "endpoint": "81aafc6f.ceacd",
+        "action": "read",
+        "deadbandvalue": "",
+        "time": 10,
+        "timeUnit": "s",
+        "localfile": "",
+        "localkeyfile": "",
+        "name": "",
+        "x": 542,
+        "y": 384,
+        "wires": [
+            [
+                "77d77b56.7bbb04"
+            ]
+        ]
+    },
+    {
+        "id": "77d77b56.7bbb04",
+        "type": "join",
+        "z": "e4bddf4f.b783b",
+        "name": "",
+        "mode": "custom",
+        "build": "object",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "browseName",
+        "joiner": ",",
+        "joinerType": "str",
+        "accumulate": false,
+        "timeout": "5",
+        "count": "4",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "",
+        "reduceFixup": "",
+        "x": 712,
+        "y": 324,
+        "wires": [
+            [
+                "1f6286ca.64aff9"
+            ]
+        ]
+    },
+    {
+        "id": "2c625e53.754582",
+        "type": "inject",
+        "z": "e4bddf4f.b783b",
+        "name": "Delete All",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "",
+        "topic": "DELETE FROM IOTDatatable",
+        "payload": "",
+        "payloadType": "date",
+        "x": 1040,
+        "y": 460,
+        "wires": [
+            [
+                "dc9fb4f1.9b0388"
+            ]
+        ]
+    },
+    {
+        "id": "57c2ec19.9806a4",
+        "type": "function",
+        "z": "e4bddf4f.b783b",
+        "name": "Get average values",
+        "func": "var crntCounts = context.get(\"crntCounts\")||[0,0,0,0];\nvar avgIntValues = context.get(\"avgIntValues\")||[0,0,0,0];\nvar avgRealValues = context.get(\"avgRealValues\")||[0,0,0,0];\nvar avgBoolValues = context.get(\"avgBoolValues\")||[0,0,0,0];\n\nvar ID = msg.payload.ID;\n\navgIntValues[ID] += msg.payload.IOT_INT;\navgRealValues[ID] += msg.payload.IOT_REAL;\navgBoolValues[ID] += (msg.payload.IOT_BOOL ? 1: 0);\n\ncrntCounts[ID]++;\nif(crntCounts[ID] == global.get(\"averageMaxCount\"))\n{\n    avgIntValues[ID] /= crntCounts[ID];\n    avgRealValues[ID] /= crntCounts[ID];\n    avgBoolValues[ID]/= crntCounts[ID];\n    \n    crntCounts[ID] = 0;\n    msg.payload.IOT_INT = avgIntValues[ID];\n    msg.payload.IOT_REAL = avgRealValues[ID];\n    msg.payload.IOT_BOOL = avgBoolValues[ID] >= 0.5 ? true : false ;\n    avgIntValues[ID]  = avgRealValues[ID] = avgBoolValues[ID] = 0;\n}\nelse\n{\n    msg =null;\n}\n\ncontext.set(\"avgIntValues\",avgIntValues);\ncontext.set(\"avgRealValues\",avgRealValues);\ncontext.set(\"avgBoolValues\",avgBoolValues);\ncontext.set(\"crntCounts\",crntCounts);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 998,
+        "y": 584,
+        "wires": [
+            [
+                "17c1aaf3.d85065"
+            ]
+        ]
+    },
+    {
+        "id": "1f6286ca.64aff9",
+        "type": "change",
+        "z": "e4bddf4f.b783b",
+        "name": "Set ID OPCUA-1500",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload.sID",
+                "pt": "msg",
+                "to": "opcua",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "payload.ID",
+                "pt": "msg",
+                "to": "2",
+                "tot": "num"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 713,
+        "y": 499,
+        "wires": [
+            [
+                "30ca5e62.10c602"
+            ]
+        ]
+    },
+    {
+        "id": "71db1273.84decc",
+        "type": "comment",
+        "z": "e4bddf4f.b783b",
+        "name": "OPC-UA Communication to S7-1500",
+        "info": "",
+        "x": 188,
+        "y": 162,
+        "wires": []
+    },
+    {
+        "id": "17c1aaf3.d85065",
+        "type": "function",
+        "z": "e4bddf4f.b783b",
+        "name": "Data handling",
+        "func": "var maxValue = global.get(\"bufferMaxCount\")||3600;\nvar plcValues = context.get(\"plcValues\")||[];\nvar actualIndex = context.get(\"actualIndex\")||0;\nvar lastIndex = global.get(\"lastStoredIndex\");\nvar nextColumns = \"\";\n\nvar boolAsTinyInt = msg.payload.IOT_BOOL ? 1 : 0 ;\n\n\nvar newLine = [];\nnewLine[0] = msg.payload.sID;\nnewLine[1] = boolAsTinyInt;\nnewLine[2] = msg.payload.IOT_INT;\nnewLine[3] = msg.payload.IOT_REAL;\nnewLine[4] = msg.payload.IOT_TIME;\n//newLine[5] = msg.payload.time.total;\n\n\nplcValues[actualIndex] = newLine;\n\n\n\nif(actualIndex > lastIndex)\n{\n    for( i= lastIndex+1;i<= actualIndex;i++)\n    {\n        nextColumns += `('${plcValues[i][0]}',${plcValues[i][1]},${plcValues[i][2]},${plcValues[i][3]},${plcValues[i][4]})`;\n        if(i != actualIndex)\n        {\n            nextColumns += \",\";\n        }\n    }\n}\nelse\n{\n    for(i= lastIndex+1;i<maxValue;i++)\n    {\n        nextColumns += `('${plcValues[i][0]}',${plcValues[i][1]},${plcValues[i][2]},${plcValues[i][3]},${plcValues[i][4]})`;\n        if(i != maxValue-1)\n        {\n            nextColumns += \",\";\n        }\n    }\n    \n    for(i= 0;i<= actualIndex;i++)\n    {\n        nextColumns += `('${plcValues[i][0]}',${plcValues[i][1]},${plcValues[i][2]},${plcValues[i][3]},${plcValues[i][4]})`;\n        if(i != actualIndex)\n        {\n            nextColumns += \",\";\n        }\n    }\n}\n    \n\n\n\nmsg.payload = newLine;\nmsg.topic = \"INSERT INTO IOTDatatable VALUES \" + nextColumns +\";\";\nmsg.actualIndex = actualIndex;\nmsg.lastIndex = lastIndex;\n\nactualIndex++;\n\nif(actualIndex == maxValue)\n{\n    actualIndex = 0;\n}\n\ncontext.set(\"plcValues\",plcValues);\ncontext.set (\"actualIndex\",actualIndex);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 1042,
+        "y": 626,
+        "wires": [
+            [
+                "dc9fb4f1.9b0388"
+            ]
+        ]
+    },
+    {
+        "id": "e5af0907.855608",
+        "type": "function",
+        "z": "e4bddf4f.b783b",
+        "name": "Data inserted into db",
+        "func": "global.set(\"lastStoredIndex\",msg.actualIndex)\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 1288,
+        "y": 405,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "57958a85.72d06c",
+        "type": "s7 endpoint",
+        "transport": "iso-on-tcp",
+        "address": "192.168.200.252",
+        "port": "102",
+        "rack": "0",
+        "slot": "1",
+        "localtsaphi": "01",
+        "localtsaplo": "00",
+        "remotetsaphi": "01",
+        "remotetsaplo": "00",
+        "connmode": "rack-slot",
+        "adapter": "",
+        "busaddr": "",
+        "cycletime": "1000",
+        "timeout": "3000",
+        "name": "S7-1500 ",
+        "vartable": [
+            {
+                "addr": "DB3,INT2",
+                "name": "IOT_INT"
+            },
+            {
+                "addr": "DB3,REAL4",
+                "name": "IOT_REAL"
+            },
+            {
+                "addr": "DB3,X0.0",
+                "name": "IOT_BOOL"
+            },
+            {
+                "addr": "DB3,DINT8",
+                "name": "IOT_TIME"
+            },
+            {
+                "addr": "I0.0",
+                "name": "E0_0"
+            },
+            {
+                "addr": "IB0",
+                "name": "Byte0"
+            },
+            {
+                "addr": "QW0",
+                "name": "QWort0"
+            },
+            {
+                "addr": "MB4",
+                "name": "Mb4"
+            }
+        ]
+    },
+    {
+        "id": "d47812eb.9b806",
+        "type": "MySQLdatabase",
+        "name": "",
+        "host": "localhost",
+        "port": "3306",
+        "db": "IOTDatabase",
+        "tz": "",
+        "charset": ""
+    },
+    {
+        "id": "81aafc6f.ceacd",
+        "type": "OpcUa-Endpoint",
+        "endpoint": "opc.tcp://192.168.200.252:4840",
+        "secpol": "None",
+        "secmode": "NONE",
+        "login": false
+    },
+    {
+        "id": "f0685f5e.8dd4d8",
+        "type": "modbus-client",
+        "name": "ModbusServerSettings",
+        "clienttype": "tcp",
+        "bufferCommands": true,
+        "stateLogEnabled": false,
+        "queueLogEnabled": false,
+        "tcpHost": "192.168.200.252",
+        "tcpPort": "503",
+        "tcpType": "DEFAULT",
+        "serialPort": "/dev/ttyUSB",
+        "serialType": "RTU-BUFFERD",
+        "serialBaudrate": "9600",
+        "serialDatabits": "8",
+        "serialStopbits": "1",
+        "serialParity": "none",
+        "serialConnectionDelay": "100",
+        "unit_id": "2",
+        "commandDelay": "1",
+        "clientTimeout": "1000",
+        "reconnectOnTimeout": false,
+        "reconnectTimeout": "2000",
+        "parallelUnitIdsAllowed": false
+    }
+]
