@@ -50,7 +50,7 @@ Use the following documents for the configuration of the IOT2050 and S7-1500:
 
 - [Configuration of the TIA Project](docs/README_TIAPROJECT.md)
 - [Setting up of the IOT2050](docs/README_IOT2050SETUP.md)
-- [Configuration of the Node-Red Flow](docs/README_NODERED_FLOW)
+- [Configuration of the Node-Red Flow](docs/README_NODERED_FLOW.md)
 
 ## **Related Links**
 
