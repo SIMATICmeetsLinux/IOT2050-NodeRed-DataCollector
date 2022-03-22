@@ -21,7 +21,11 @@
 
 ## **Use of the ready-made Project-File**
 
-The following document shows the necessary configurations of the TIA project. If you use the ready-made project-file from the download above all the following configurations are already made. You should only make sure that the IOT2050 and the PLC are in the same subnet. You can find further information in the section [PUT/GET Communication](#putget-communication).
+The following document shows the necessary configurations of the TIA project. If you use the ready-made project-file from the download above all the following configurations are already made. Make sure that the IOT2050 and the PLC are in the same subnet. To set the IP Address of the PLC you must open the device view and select the PROFINET Interface. In the properties tab go to *Ethernet addresses*.
+
+![Figure 2-4 Set PLC IP Address](graphics/2-4-Set-PLC-IP-Address.png)
+
+The IP address 192.168.0.252 is preset for the simulated S7 controller. If a different IP address is used here, it must be adapted in the Node-Red configurations.
 
 If you have used this way you can start directly with the [Setting up of the IOT2050](README_IOT2050SETUP.md).
 
@@ -61,10 +65,6 @@ Open the device view and select the PLC. In the properties tab go to *Protection
 ![Figure 2-3 Enable PUT/GET](graphics/2-3-Enable-PUT-GET.png)
 
 **WARNING:** Please be aware that by enabling the PUT/GET communication you are allowing any application using this method to access the data on your PLC.
-
-The PLC and The IOT2050 should both be on the same Subnet. To set the IP Address of the PLC you must open the device view and select the PROFINET Interface. In the properties tab go to *Ethernet addresses*.
-
-![Figure 2-4 Set PLC IP Address](graphics/2-4-Set-PLC-IP-Address.png)
 
 ## **Modbus TCP Communication**
 
